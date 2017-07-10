@@ -9,8 +9,8 @@
     @mouseup="onDragEnd"
     @mousemove="onMouseMove"
     @click="clicked"
-    v-bind:class="cursor"
-    />  
+    v-bind:class="cursor">
+  </canvas>  
   <input
     type="file"
     id='ab-1'
@@ -36,7 +36,7 @@
 </style>
 
 <script>
-const drawRoundedRect (context, x, y, width, height, borderRadius) => {
+const drawRoundedRect = (context, x, y, width, height, borderRadius) => {
     if (borderRadius === 0) {
         context.rect(x, y, width, height);
     } else {

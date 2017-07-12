@@ -332,6 +332,7 @@ export default {
             return Math.max(-heightDiff, Math.min(y, heightDiff));
         },
         paintImage: function (context, image, border) {
+            console.log('paintImage', image.resource);
             if (image.resource) {
                 var position = this.calculatePosition(image, border);
                 context.save();
@@ -449,6 +450,7 @@ export default {
     watch: {
         state: {
             handler: function (val, oldval) {
+                console.log('state watch', this.imageLoaded);
                 if (this.imageLoaded === true) {
                     this.redraw();
                 }

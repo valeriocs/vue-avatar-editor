@@ -256,20 +256,19 @@ export default {
         },
         loadImage: function (imageURL) {
             var imageObj = new Image();
-            var self = this;
 
-            imageObj.onload = function () {
-                self.handleImageReady(imageObj);
-            };
+            imageObj.onload = () => this.handleImageReady(imageObj);
+            imageObj.onerror = (err) => console.log('error loading image: ', err);
 
             // imageObj.onerror = this.props.onLoadFailure
             if (!this.isDataURL(imageURL)) {
                 imageObj.crossOrigin = 'anonymous';
             }
-
+            console.log(imageURL);
             imageObj.src = imageURL;
         },
         handleImageReady: function (image) {
+            console.log('image ready');
             var imageState = this.getInitialSize(image.width, image.height);
             imageState.resource = image;
 

@@ -4,6 +4,7 @@
   "description": "Resize and crop your uploaded image using a clear user interface",
   "author": "Alec Troemel <alec@mirusresearch.com>",
   "private": true,
+  "main": "src/index.js",
   "scripts": {
     "dev": "node build/dev-server.js",
     "start": "node build/dev-server.js",

@@ -1,6 +1,7 @@
 # vue-avatar-editor
+Resize and crop your uploaded image using a clear user interface
+based on a fork of https://github.com/two20/vue-avatar-editor
 
-> Resize and crop your uploaded image using a clear user interface
 
 ## Build Setup
 
@@ -17,5 +18,3 @@ npm run build
 # build for production and view the bundle analyzer report
 npm run build --report
 ```
-
-For detailed explanation on how things work, checkout the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).

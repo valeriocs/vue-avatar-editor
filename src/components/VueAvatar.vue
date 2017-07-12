@@ -83,7 +83,7 @@ export default {
             default: () => [0, 0, 0, 0.5]
         }
     },
-    data () {
+    data: function () {
         return {
             cursor: 'cursorPointer',
             scale: 1,
@@ -113,7 +113,7 @@ export default {
             return this.getDimensions().canvas.height;
         }
     },
-    mounted () {
+    mounted: function () {
         let self = this;
         this.canvas = this.$refs.canvas;
         this.context = this.canvas.getContext('2d');
@@ -264,7 +264,7 @@ export default {
             if (!this.isDataURL(imageURL)) {
                 imageObj.crossOrigin = 'anonymous';
             }
-            console.log(imageURL);
+            // console.log(imageURL);
             imageObj.src = imageURL;
         },
         handleImageReady: function (image) {
@@ -288,6 +288,7 @@ export default {
             this.$emit('vue-avatar-editor:image-ready', this.scale);
             this.imageLoaded = true;
             this.cursor = 'cursorGrab';
+            console.log('state image ', this.state.image.resource);
         },
         getInitialSize: function (width, height) {
             let newHeight;
@@ -334,6 +335,7 @@ export default {
             console.log('paintImage', image.resource);
             if (image.resource) {
                 var position = this.calculatePosition(image, border);
+                console.log(position);
                 context.save();
                 context.globalCompositeOperation = 'destination-over';
                 context.drawImage(

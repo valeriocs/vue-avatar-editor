@@ -3,14 +3,15 @@
     <canvas
       :width="canvasWidth"
       :height="canvasHeight"
-      ref="canvas"
+      class="cursorPointer"
+      id="avatarEditorCanvas"
+      ref="avatarEditorCanvas"
       @dragover.prevent
       @drop="onDrop"
       @mousedown="onDragStart"
       @mouseup="onDragEnd"
       @mousemove="onMouseMove"
-      @click="clicked"
-      v-bind:class="cursor">
+      @click="clicked">
     </canvas>
     <input
       type="file"
@@ -22,14 +23,21 @@
 </template>
 
 <style type="text/css">
+canvas {
+    width: 100%;
+    height: 100%;
+}
+
 .cursorPointer{
     cursor: pointer;
 }
+
 .cursorGrab{
     cursor: grab;
     cursor: -webkit-grab;
     cursor: -moz-grab;
 }
+
 .cursorGrabbing{
     cursor: grabbing;
     cursor: -webkit-grabbing;
@@ -99,7 +107,7 @@ export default {
                 xxx: 'ab',
                 image: {
                     x: 0,
-                    y: 0,
+                     y: 0,
                     resource: null
                 }
             }
@@ -115,7 +123,7 @@ export default {
     },
     mounted: function () {
         let self = this;
-        this.canvas = this.$refs.canvas;
+        this.canvas = this.$refs.avatarEditorCanvas;
         this.context = this.canvas.getContext('2d');
         this.paint();
 
@@ -123,11 +131,8 @@ export default {
             var placeHolder = this.svgToImage('<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 65 65"><defs><style>.cls-1{fill:#000;}</style></defs><title>Upload_Upload</title><path class="cls-1" d="M32.5,1A31.5,31.5,0,1,1,1,32.5,31.54,31.54,0,0,1,32.5,1m0-1A32.5,32.5,0,1,0,65,32.5,32.5,32.5,0,0,0,32.5,0h0Z"/><polygon class="cls-1" points="41.91 28.2 32.59 18.65 23.09 28.39 24.17 29.44 31.87 21.54 31.87 40.05 33.37 40.05 33.37 21.59 40.83 29.25 41.91 28.2"/><polygon class="cls-1" points="40.66 40.35 40.66 44.35 24.34 44.35 24.34 40.35 22.34 40.35 22.34 44.35 22.34 46.35 24.34 46.35 40.66 46.35 42.66 46.35 42.66 44.35 42.66 40.35 40.66 40.35"/></svg>');
 
             placeHolder.onload = function () {
-                // console.log('width: ', this.width);
-                // console.log(this.type);
                 var x = self.canvasWidth / 2 - this.width / 2;
                 var y = self.canvasHeight / 2 - this.height / 2;
-                // console.log('x: ', x, 'y: ', y);
                 self.context.drawImage(placeHolder, x, y, this.width, this.height);
             };
         } else {
@@ -255,40 +260,31 @@ export default {
             // this.setState(newState)
         },
         loadImage: function (imageURL) {
-            var imageObj = new Image();
+            let imageObj = new Image();
+            let self = this;
 
-            imageObj.onload = () => this.handleImageReady(imageObj);
+            // imageObj.onload = () => this.handleImageReady(imageObj);
+            imageObj.onload = () => {
+                let imageState = self.getInitialSize(imageObj.width, imageObj.height);
+                self.state.image.x = 0;
+                self.state.image.y = 0;
+                self.state.image.resource = imageObj;
+                self.state.image.width = imageState.width;
+                self.state.image.height = imageState.height;
+                self.state.drag = false;
+                self.scale = 1;
+                self.$emit('vue-avatar-editor:image-ready', self.scale);
+                self.imageLoaded = true;
+                self.cursor = 'cursorGrab';
+            };
             imageObj.onerror = (err) => console.log('error loading image: ', err);
 
             // imageObj.onerror = this.props.onLoadFailure
             if (!this.isDataURL(imageURL)) {
                 imageObj.crossOrigin = 'anonymous';
             }
-            // console.log(imageURL);
+
             imageObj.src = imageURL;
-        },
-        handleImageReady: function (image) {
-            console.log('image ready');
-            var imageState = this.getInitialSize(image.width, image.height);
-            imageState.resource = image;
-
-            imageState.x = 0;
-            imageState.y = 0;
-
-            var oldState = this.state;
-            oldState.drag = false;
-            oldState.image = imageState;
-            this.state.image.x = 0;
-            this.state.image.y = 0;
-            this.state.image.resource = image;
-            this.state.image.width = imageState.width;
-            this.state.image.height = imageState.height;
-            this.state.drag = false;
-            this.scale = 1;
-            this.$emit('vue-avatar-editor:image-ready', this.scale);
-            this.imageLoaded = true;
-            this.cursor = 'cursorGrab';
-            console.log('state image ', this.state.image.resource);
         },
         getInitialSize: function (width, height) {
             let newHeight;
@@ -332,10 +328,8 @@ export default {
             return Math.max(-heightDiff, Math.min(y, heightDiff));
         },
         paintImage: function (context, image, border) {
-            console.log('paintImage', image.resource);
             if (image.resource) {
                 var position = this.calculatePosition(image, border);
-                console.log(position);
                 context.save();
                 context.globalCompositeOperation = 'destination-over';
                 context.drawImage(
@@ -451,8 +445,7 @@ export default {
     watch: {
         state: {
             handler: function (val, oldval) {
-                console.log('state watch', this.imageLoaded);
-                if (this.imageLoaded === true) {
+                if (this.imageLoaded) {
                     this.redraw();
                 }
             },

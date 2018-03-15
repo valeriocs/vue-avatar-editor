@@ -9,7 +9,7 @@ based on a fork of https://github.com/two20/vue-avatar-editor
 # install dependencies
 npm install
 
-# serve with hot reload at localhost:8081
+# serve with hot reload at localhost:8080
 npm run dev
 
 # build for production with minification

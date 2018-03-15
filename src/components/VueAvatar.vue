@@ -88,6 +88,10 @@ export default {
         color: {
             type: Array,
             default: () => [0, 0, 0, 0.5]
+        },
+        rotation: {
+            type: Number,
+            default: 90
         }
     },
     data: function () {
@@ -118,6 +122,9 @@ export default {
         },
         canvasHeight () {
             return this.getDimensions().canvas.height;
+        },
+        rotationRadian () {
+            return this.rotation * Math.PI / 180;
         }
     },
     mounted: function () {
@@ -335,14 +342,16 @@ export default {
         getBoundedX: function (x, scale) {
             var image = this.state.image;
             var dimensions = this.getDimensions();
-            let widthDiff = Math.floor((image.width - dimensions.width / scale) / 2);
+            let width = Math.abs(image.width * Math.cos(this.rotationRadian) - image.height * Math.sin(this.rotationRadian));
+            let widthDiff = Math.floor((width - dimensions.width / scale) / 2);
             widthDiff = Math.max(0, widthDiff);
             return Math.max(-widthDiff, Math.min(x, widthDiff));
         },
         getBoundedY: function (y, scale) {
             var image = this.state.image;
             var dimensions = this.getDimensions();
-            let heightDiff = Math.floor((image.height - dimensions.height / scale) / 2);
+            let height = Math.abs(image.width * Math.sin(this.rotationRadian) + image.height * Math.cos(this.rotationRadian));
+            let heightDiff = Math.floor((height - dimensions.height / scale) / 2);
             heightDiff = Math.max(0, heightDiff);
             return Math.max(-heightDiff, Math.min(y, heightDiff));
         },
@@ -351,28 +360,41 @@ export default {
                 var position = this.calculatePosition(image, border);
                 context.save();
                 context.globalCompositeOperation = 'destination-over';
+                let dimensions = this.getDimensions();
+                let width = Math.abs(dimensions.width * Math.cos(this.rotationRadian) - dimensions.height * Math.sin(this.rotationRadian));
+                let height = Math.abs(dimensions.width * Math.sin(this.rotationRadian) + dimensions.height * Math.cos(this.rotationRadian));
+                context.translate(dimensions.width / 2, dimensions.height / 2);
+                context.rotate(this.rotationRadian);
                 context.drawImage(
                     image.resource,
-                    position.x,
-                    position.y,
+                    position.x - (width / 2),
+                    position.y - (height / 2),
                     position.width,
                     position.height);
+                context.rotate(-this.rotationRadian);
+                context.translate(-dimensions.width / 2, -dimensions.height / 2);
                 context.restore();
             }
+        },
+        transformDataWithRotation (x, y) {
+            let radian = -this.rotationRadian;
+            let rx = x * Math.cos(radian) - y * Math.sin(radian);
+            let ry = x * Math.sin(radian) + y * Math.cos(radian);
+            return [rx, ry];
         },
         calculatePosition: function (image, border) {
             image = image || this.state.image;
             var dimensions = this.getDimensions();
-            var width = image.width * this.scale;
-            var height = image.height * this.scale;
+            let width = image.width * this.scale;
+            let height = image.height * this.scale;
             var widthDiff = (width - dimensions.width) / 2;
             var heightDiff = (height - dimensions.height) / 2;
             var x = image.x * this.scale - widthDiff + border;
             var y = image.y * this.scale - heightDiff + border;
-
+            let [rx, ry] = this.transformDataWithRotation(x, y);
             return {
-                x,
-                y,
+                x: rx,
+                y: ry,
                 height,
                 width
             };

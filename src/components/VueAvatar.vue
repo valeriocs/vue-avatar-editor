@@ -14,7 +14,7 @@
     </canvas>
     <input
       type="file"
-      id='ab-1'
+      ref="input"
       @change="fileSelected"
       style="display:none;"
       />
@@ -88,10 +88,6 @@ export default {
         color: {
             type: Array,
             default: () => [0, 0, 0, 0.5]
-        },
-        rotation: {
-            type: Number,
-            default: 90
         }
     },
     data: function () {
@@ -113,7 +109,8 @@ export default {
                     y: 0,
                     resource: null
                 }
-            }
+            },
+            rotation: 0
         };
     },
     computed: {
@@ -285,6 +282,11 @@ export default {
             this.state.image = imageState;
             // this.setState(newState)
         },
+        replaceImageInBounds () {
+            let imageState = this.state.image;
+            imageState.y = this.getBoundedY(imageState.y, this.scale);
+            imageState.x = this.getBoundedX(imageState.x, this.scale);
+        },
         loadImage: function (imageURL) {
             let imageObj = new Image();
             let self = this;
@@ -342,7 +344,9 @@ export default {
         getBoundedX: function (x, scale) {
             var image = this.state.image;
             var dimensions = this.getDimensions();
-            let width = Math.abs(image.width * Math.cos(this.rotationRadian) - image.height * Math.sin(this.rotationRadian));
+            let width = Math.abs(image.width * Math.cos(this.rotationRadian)) + Math.abs(image.height * Math.sin(this.rotationRadian));
+            console.log(width);
+            // let width = image.width * Math.cos(this.rotationRadian);
             let widthDiff = Math.floor((width - dimensions.width / scale) / 2);
             widthDiff = Math.max(0, widthDiff);
             return Math.max(-widthDiff, Math.min(x, widthDiff));
@@ -350,7 +354,7 @@ export default {
         getBoundedY: function (y, scale) {
             var image = this.state.image;
             var dimensions = this.getDimensions();
-            let height = Math.abs(image.width * Math.sin(this.rotationRadian) + image.height * Math.cos(this.rotationRadian));
+            let height = Math.abs(image.width * Math.sin(this.rotationRadian)) + Math.abs(image.height * Math.cos(this.rotationRadian));
             let heightDiff = Math.floor((height - dimensions.height / scale) / 2);
             heightDiff = Math.max(0, heightDiff);
             return Math.max(-heightDiff, Math.min(y, heightDiff));
@@ -361,18 +365,17 @@ export default {
                 context.save();
                 context.globalCompositeOperation = 'destination-over';
                 let dimensions = this.getDimensions();
-                let width = Math.abs(dimensions.width * Math.cos(this.rotationRadian) - dimensions.height * Math.sin(this.rotationRadian));
-                let height = Math.abs(dimensions.width * Math.sin(this.rotationRadian) + dimensions.height * Math.cos(this.rotationRadian));
+                // let width = Math.abs(dimensions.width * Math.cos(this.rotationRadian) - dimensions.height * Math.sin(this.rotationRadian));
+                // let height = Math.abs(dimensions.width * Math.sin(this.rotationRadian) + dimensions.height * Math.cos(this.rotationRadian));
                 context.translate(dimensions.width / 2, dimensions.height / 2);
                 context.rotate(this.rotationRadian);
+                context.translate(-dimensions.width / 2, -dimensions.height / 2);
                 context.drawImage(
                     image.resource,
-                    position.x - (width / 2),
-                    position.y - (height / 2),
+                    position.x,
+                    position.y,
                     position.width,
                     position.height);
-                context.rotate(-this.rotationRadian);
-                context.translate(-dimensions.width / 2, -dimensions.height / 2);
                 context.restore();
             }
         },
@@ -389,12 +392,14 @@ export default {
             let height = image.height * this.scale;
             var widthDiff = (width - dimensions.width) / 2;
             var heightDiff = (height - dimensions.height) / 2;
-            var x = image.x * this.scale - widthDiff + border;
-            var y = image.y * this.scale - heightDiff + border;
-            let [rx, ry] = this.transformDataWithRotation(x, y);
+            var x = image.x * this.scale;// - widthDiff;
+            var y = image.y * this.scale;// - heightDiff;
+            [x, y] = this.transformDataWithRotation(x, y);
+            x += border - widthDiff;
+            y += border - heightDiff;
             return {
-                x: rx,
-                y: ry,
+                x,
+                y,
                 height,
                 width
             };
@@ -402,6 +407,13 @@ export default {
         changeScale: function (sc) {
             this.changed = true;
             this.scale = sc;
+            this.onMouseMove({clientX: 0, clientY: 0});
+        },
+        changeRotation: function (rotation) {
+            this.changed = true;
+            this.rotation = rotation;
+            this.replaceImageInBounds();
+            this.redraw();
         },
         redraw: function () {
             this.context.clearRect(0, 0, this.getDimensions().canvas.width, this.getDimensions().canvas.height);
@@ -465,7 +477,7 @@ export default {
             if (this.dragged === true) {
                 this.dragged = false;
             } else {
-                document.getElementById('ab-1').click();
+                this.$refs.input.click();
             }
         },
         fileSelected: function (e) {

@@ -18,6 +18,15 @@
       :step=0.02
       >
     </vue-avatar-scale>
+    <vue-avatar-scale
+      ref="vueavatarrotate"
+      @vue-avatar-editor-scale:change-scale="onChangeRotate"
+      :width=250
+      :min=0
+      :max=360
+      :step=1
+      >
+    </vue-avatar-scale>
     <br>
     <img src="" id="img-1">
     <button v-on:click="saveClicked">Click</button>
@@ -30,6 +39,9 @@
         methods: {
             onChangeScale (scale) {
                 this.$refs.vueavatar.changeScale(scale);
+            },
+            onChangeRotate (scale) {
+                this.$refs.vueavatar.changeRotation(scale);
             },
             saveClicked () {
                 var img = this.$refs.vueavatar.getImageScaled();

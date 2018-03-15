@@ -227,7 +227,7 @@ export default {
             let hasMoved = false;
             let handleMouseUp = (event) => {
                 this.onDragEnd(event);
-                if (!hasMoved) {
+                if (!hasMoved && event.targetTouches) {
                     e.target.click();
                 }
                 body.removeEventListener('mouseup', handleMouseUp);

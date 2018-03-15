@@ -216,26 +216,26 @@ export default {
             this.state.mx = null;
             this.state.my = null;
             this.cursor = 'cursorGrabbing';
-            let body = document.body;
+            let eventSubject = document;
             let hasMoved = false;
             let handleMouseUp = (event) => {
                 this.onDragEnd(event);
                 if (!hasMoved && event.targetTouches) {
                     e.target.click();
                 }
-                body.removeEventListener('mouseup', handleMouseUp);
-                body.removeEventListener('mousemove', handleMouseMove);
-                body.removeEventListener('touchend', handleMouseUp);
-                body.removeEventListener('touchmove', handleMouseMove);
+                eventSubject.removeEventListener('mouseup', handleMouseUp);
+                eventSubject.removeEventListener('mousemove', handleMouseMove);
+                eventSubject.removeEventListener('touchend', handleMouseUp);
+                eventSubject.removeEventListener('touchmove', handleMouseMove);
             };
             let handleMouseMove = (event) => {
                 hasMoved = true;
                 this.onMouseMove(event);
             };
-            body.addEventListener('mouseup', handleMouseUp);
-            body.addEventListener('mousemove', handleMouseMove);
-            body.addEventListener('touchend', handleMouseUp);
-            body.addEventListener('touchmove', handleMouseMove);
+            eventSubject.addEventListener('mouseup', handleMouseUp);
+            eventSubject.addEventListener('mousemove', handleMouseMove);
+            eventSubject.addEventListener('touchend', handleMouseUp);
+            eventSubject.addEventListener('touchmove', handleMouseMove);
         },
         onDragEnd: function (e) {
             if (this.state.drag) {

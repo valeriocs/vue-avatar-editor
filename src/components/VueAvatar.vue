@@ -301,6 +301,7 @@ export default {
                 self.state.image.height = imageState.height;
                 self.state.drag = false;
                 self.scale = 1;
+                self.rotation = 0;
                 self.$emit('vue-avatar-editor:image-ready', self.scale);
                 self.imageLoaded = true;
                 self.cursor = 'cursorGrab';
@@ -345,8 +346,6 @@ export default {
             var image = this.state.image;
             var dimensions = this.getDimensions();
             let width = Math.abs(image.width * Math.cos(this.rotationRadian)) + Math.abs(image.height * Math.sin(this.rotationRadian));
-            console.log(width);
-            // let width = image.width * Math.cos(this.rotationRadian);
             let widthDiff = Math.floor((width - dimensions.width / scale) / 2);
             widthDiff = Math.max(0, widthDiff);
             return Math.max(-widthDiff, Math.min(x, widthDiff));
@@ -365,11 +364,9 @@ export default {
                 context.save();
                 context.globalCompositeOperation = 'destination-over';
                 let dimensions = this.getDimensions();
-                // let width = Math.abs(dimensions.width * Math.cos(this.rotationRadian) - dimensions.height * Math.sin(this.rotationRadian));
-                // let height = Math.abs(dimensions.width * Math.sin(this.rotationRadian) + dimensions.height * Math.cos(this.rotationRadian));
-                context.translate(dimensions.width / 2, dimensions.height / 2);
+                context.translate(dimensions.canvas.width / 2, dimensions.canvas.height / 2);
                 context.rotate(this.rotationRadian);
-                context.translate(-dimensions.width / 2, -dimensions.height / 2);
+                context.translate(-dimensions.canvas.width / 2, -dimensions.canvas.height / 2);
                 context.drawImage(
                     image.resource,
                     position.x,
@@ -407,7 +404,7 @@ export default {
         changeScale: function (sc) {
             this.changed = true;
             this.scale = sc;
-            this.onMouseMove({clientX: 0, clientY: 0});
+            this.replaceImageInBounds();
         },
         changeRotation: function (rotation) {
             this.changed = true;

@@ -49,6 +49,7 @@
             },
             onImageReady (scale) {
                 this.$refs.vueavatarscale.setScale(scale);
+                this.$refs.vueavatarrotate.setScale(0);
             }
         }
     };

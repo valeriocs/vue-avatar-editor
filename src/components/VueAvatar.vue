@@ -9,8 +9,7 @@
       @dragover.prevent
       @drop="onDrop"
       @mousedown="onDragStart"
-      @mouseup="onDragEnd"
-      @mousemove="onMouseMove"
+      @touchstart="onDragStart"
       @click="clicked">
     </canvas>
     <input
@@ -24,8 +23,8 @@
 
 <style type="text/css">
 canvas {
-    width: 100%;
-    height: 100%;
+    width: 300px;
+    height: 300px;
 }
 
 .cursorPointer{
@@ -107,7 +106,7 @@ export default {
                 xxx: 'ab',
                 image: {
                     x: 0,
-                     y: 0,
+                    y: 0,
                     resource: null
                 }
             }
@@ -217,6 +216,26 @@ export default {
             this.state.mx = null;
             this.state.my = null;
             this.cursor = 'cursorGrabbing';
+            let body = document.body;
+            let hasMoved = false;
+            let handleMouseUp = (event) => {
+                this.onDragEnd(event);
+                if (!hasMoved) {
+                    e.target.click();
+                }
+                body.removeEventListener('mouseup', handleMouseUp);
+                body.removeEventListener('mousemove', handleMouseMove);
+                body.removeEventListener('touchend', handleMouseUp);
+                body.removeEventListener('touchmove', handleMouseMove);
+            };
+            let handleMouseMove = (event) => {
+                hasMoved = true;
+                this.onMouseMove(event);
+            };
+            body.addEventListener('mouseup', handleMouseUp);
+            body.addEventListener('mousemove', handleMouseMove);
+            body.addEventListener('touchend', handleMouseUp);
+            body.addEventListener('touchmove', handleMouseMove);
         },
         onDragEnd: function (e) {
             if (this.state.drag) {

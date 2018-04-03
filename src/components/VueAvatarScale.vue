@@ -1,10 +1,11 @@
 <template>
   <input
-    v-model="scale"
+    :value="value"
     type="range"
     :min="min"
     :max="max"
     :step="step"
+    @input="sendValue"
     :style="{ width:width +'px'}"
     />
 </template>
@@ -27,21 +28,15 @@
             step: {
                 type: Number,
                 default: 0.01
+            },
+            value: {
+                type: Number,
+                default: 0
             }
         },
         methods: {
-            setScale: function (scale) {
-                this.scale = scale;
-            }
-        },
-        data: function () {
-            return {
-                scale: 1
-            };
-        },
-        watch: {
-            scale: function () {
-                this.$emit('vue-avatar-editor-scale:change-scale', this.scale);
+            sendValue ($event) {
+                this.$emit('update:value', parseFloat($event.target.value));
             }
         }
     };

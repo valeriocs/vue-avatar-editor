@@ -4,6 +4,8 @@
     <vue-avatar
       :width=400
       :height=400
+      :rotation="rotation"
+      :scale="scale"
       ref="vueavatar"
       @vue-avatar-editor:image-ready="onImageReady"
       >
@@ -11,15 +13,24 @@
     <br>
     <vue-avatar-scale
       ref="vueavatarscale"
-      @vue-avatar-editor-scale:change-scale="onChangeScale"
       :width=250
       :min=1
       :max=3
       :step=0.02
+      :value.sync='scale'
+      >
+    </vue-avatar-scale>
+    <vue-avatar-scale
+      ref="vueavatarrotate"
+      :width=250
+      :min=0
+      :max=360
+      :step=1
+      :value.sync='rotation'
       >
     </vue-avatar-scale>
     <br>
-    <img src="" id="img-1">
+    <img src="" ref="image">
     <button v-on:click="saveClicked">Click</button>
   </div>
 </template>
@@ -27,16 +38,21 @@
 <script>
     export default {
         name: 'app',
+        data () {
+            return {
+                rotation: 0,
+                scale: 1
+            };
+        },
         methods: {
-            onChangeScale (scale) {
-                this.$refs.vueavatar.changeScale(scale);
-            },
             saveClicked () {
                 var img = this.$refs.vueavatar.getImageScaled();
-                document.getElementById('img-1').src = img.toDataURL();
+                this.$refs.image.src = img.toDataURL();
             },
-            onImageReady (scale) {
-                this.$refs.vueavatarscale.setScale(scale);
+            onImageReady () {
+                console.log('here');
+                this.scale = 1;
+                this.rotation = 0;
             }
         }
     };

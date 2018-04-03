@@ -9,13 +9,12 @@
       @dragover.prevent
       @drop="onDrop"
       @mousedown="onDragStart"
-      @mouseup="onDragEnd"
-      @mousemove="onMouseMove"
+      @touchstart="onDragStart"
       @click="clicked">
     </canvas>
     <input
       type="file"
-      id='ab-1'
+      ref="input"
       @change="fileSelected"
       style="display:none;"
       />
@@ -24,8 +23,8 @@
 
 <style type="text/css">
 canvas {
-    width: 100%;
-    height: 100%;
+    width: 300px;
+    height: 300px;
 }
 
 .cursorPointer{
@@ -89,12 +88,19 @@ export default {
         color: {
             type: Array,
             default: () => [0, 0, 0, 0.5]
+        },
+        scale: {
+            type: Number,
+            default: 1
+        },
+        rotation: {
+            type: Number,
+            default: 0
         }
     },
-    data: function () {
+    data () {
         return {
             cursor: 'cursorPointer',
-            scale: 1,
             canvas: null,
             context: null,
             dragged: false,
@@ -107,7 +113,7 @@ export default {
                 xxx: 'ab',
                 image: {
                     x: 0,
-                     y: 0,
+                    y: 0,
                     resource: null
                 }
             }
@@ -119,9 +125,12 @@ export default {
         },
         canvasHeight () {
             return this.getDimensions().canvas.height;
+        },
+        rotationRadian () {
+            return this.rotation * Math.PI / 180;
         }
     },
-    mounted: function () {
+    mounted () {
         let self = this;
         this.canvas = this.$refs.avatarEditorCanvas;
         this.context = this.canvas.getContext('2d');
@@ -148,14 +157,14 @@ export default {
             img.src = url;
             return img;
         },
-        setState: function (state1) {
+        setState (state1) {
             var min = Math.ceil(1);
             var max = Math.floor(10000);
 
             this.state = state1;
             this.state.cnt = 'HELLO' + Math.floor(Math.random() * (max - min)) + min;
         },
-        paint: function () {
+        paint () {
             this.context.save();
             this.context.translate(0, 0);
             this.context.fillStyle = 'rgba(' + this.color.slice(0, 4).join(',') + ')';
@@ -185,7 +194,7 @@ export default {
             this.context.fill('evenodd');
             this.context.restore();
         },
-        getDimensions: function () {
+        getDimensions () {
             return {
                 width: this.width,
                 height: this.height,
@@ -196,7 +205,7 @@ export default {
                 }
             };
         },
-        onDrop: function (e) {
+        onDrop (e) {
             e = e || window.event;
             e.stopPropagation();
             e.preventDefault();
@@ -210,21 +219,41 @@ export default {
                 reader.readAsDataURL(file);
             }
         },
-        onDragStart: function (e) {
+        onDragStart (e) {
             e = e || window.event;
             e.preventDefault();
             this.state.drag = true;
             this.state.mx = null;
             this.state.my = null;
             this.cursor = 'cursorGrabbing';
+            let eventSubject = document;
+            let hasMoved = false;
+            let handleMouseUp = (event) => {
+                this.onDragEnd(event);
+                if (!hasMoved && event.targetTouches) {
+                    e.target.click();
+                }
+                eventSubject.removeEventListener('mouseup', handleMouseUp);
+                eventSubject.removeEventListener('mousemove', handleMouseMove);
+                eventSubject.removeEventListener('touchend', handleMouseUp);
+                eventSubject.removeEventListener('touchmove', handleMouseMove);
+            };
+            let handleMouseMove = (event) => {
+                hasMoved = true;
+                this.onMouseMove(event);
+            };
+            eventSubject.addEventListener('mouseup', handleMouseUp);
+            eventSubject.addEventListener('mousemove', handleMouseMove);
+            eventSubject.addEventListener('touchend', handleMouseUp);
+            eventSubject.addEventListener('touchmove', handleMouseMove);
         },
-        onDragEnd: function (e) {
+        onDragEnd (e) {
             if (this.state.drag) {
                 this.state.drag = false;
                 this.cursor = 'cursorPointer';
             }
         },
-        onMouseMove: function (e) {
+        onMouseMove (e) {
             e = e || window.event;
             if (this.state.drag === false) {
                 return;
@@ -259,7 +288,12 @@ export default {
             this.state.image = imageState;
             // this.setState(newState)
         },
-        loadImage: function (imageURL) {
+        replaceImageInBounds () {
+            let imageState = this.state.image;
+            imageState.y = this.getBoundedY(imageState.y, this.scale);
+            imageState.x = this.getBoundedX(imageState.x, this.scale);
+        },
+        loadImage (imageURL) {
             let imageObj = new Image();
             let self = this;
 
@@ -272,7 +306,6 @@ export default {
                 self.state.image.width = imageState.width;
                 self.state.image.height = imageState.height;
                 self.state.drag = false;
-                self.scale = 1;
                 self.$emit('vue-avatar-editor:image-ready', self.scale);
                 self.imageLoaded = true;
                 self.cursor = 'cursorGrab';
@@ -286,7 +319,7 @@ export default {
 
             imageObj.src = imageURL;
         },
-        getInitialSize: function (width, height) {
+        getInitialSize (width, height) {
             let newHeight;
             let newWidth;
 
@@ -307,31 +340,37 @@ export default {
                 width: newWidth
             };
         },
-        isDataURL: function (str) {
+        isDataURL (str) {
             if (str === null) {
                 return false;
             }
             return !!str.match(/^\s*data:([a-z]+\/[a-z]+(;[a-z\-]+=[a-z\-]+)?)?(;base64)?,[a-z0-9!$&',()*+;=\-._~:@\/?%\s]*\s*$/i); // eslint-disable-line no-useless-escape
         },
-        getBoundedX: function (x, scale) {
+        getBoundedX (x, scale) {
             var image = this.state.image;
             var dimensions = this.getDimensions();
-            let widthDiff = Math.floor((image.width - dimensions.width / scale) / 2);
+            let width = Math.abs(image.width * Math.cos(this.rotationRadian)) + Math.abs(image.height * Math.sin(this.rotationRadian));
+            let widthDiff = Math.floor((width - dimensions.width / scale) / 2);
             widthDiff = Math.max(0, widthDiff);
             return Math.max(-widthDiff, Math.min(x, widthDiff));
         },
-        getBoundedY: function (y, scale) {
+        getBoundedY (y, scale) {
             var image = this.state.image;
             var dimensions = this.getDimensions();
-            let heightDiff = Math.floor((image.height - dimensions.height / scale) / 2);
+            let height = Math.abs(image.width * Math.sin(this.rotationRadian)) + Math.abs(image.height * Math.cos(this.rotationRadian));
+            let heightDiff = Math.floor((height - dimensions.height / scale) / 2);
             heightDiff = Math.max(0, heightDiff);
             return Math.max(-heightDiff, Math.min(y, heightDiff));
         },
-        paintImage: function (context, image, border) {
+        paintImage (context, image, border) {
             if (image.resource) {
                 var position = this.calculatePosition(image, border);
                 context.save();
                 context.globalCompositeOperation = 'destination-over';
+                let dimensions = this.getDimensions();
+                context.translate(dimensions.canvas.width / 2, dimensions.canvas.height / 2);
+                context.rotate(this.rotationRadian);
+                context.translate(-dimensions.canvas.width / 2, -dimensions.canvas.height / 2);
                 context.drawImage(
                     image.resource,
                     position.x,
@@ -341,16 +380,24 @@ export default {
                 context.restore();
             }
         },
-        calculatePosition: function (image, border) {
+        transformDataWithRotation (x, y) {
+            let radian = -this.rotationRadian;
+            let rx = x * Math.cos(radian) - y * Math.sin(radian);
+            let ry = x * Math.sin(radian) + y * Math.cos(radian);
+            return [rx, ry];
+        },
+        calculatePosition (image, border) {
             image = image || this.state.image;
             var dimensions = this.getDimensions();
-            var width = image.width * this.scale;
-            var height = image.height * this.scale;
+            let width = image.width * this.scale;
+            let height = image.height * this.scale;
             var widthDiff = (width - dimensions.width) / 2;
             var heightDiff = (height - dimensions.height) / 2;
-            var x = image.x * this.scale - widthDiff + border;
-            var y = image.y * this.scale - heightDiff + border;
-
+            var x = image.x * this.scale;// - widthDiff;
+            var y = image.y * this.scale;// - heightDiff;
+            [x, y] = this.transformDataWithRotation(x, y);
+            x += border - widthDiff;
+            y += border - heightDiff;
             return {
                 x,
                 y,
@@ -358,16 +405,12 @@ export default {
                 width
             };
         },
-        changeScale: function (sc) {
-            this.changed = true;
-            this.scale = sc;
-        },
-        redraw: function () {
+        redraw () {
             this.context.clearRect(0, 0, this.getDimensions().canvas.width, this.getDimensions().canvas.height);
             this.paint();
             this.paintImage(this.context, this.state.image, this.border);
         },
-        getImage: function () {
+        getImage () {
             const cropRect = this.getCroppingRect();
             const image = this.state.image;
 
@@ -388,7 +431,7 @@ export default {
 
             return canvas;
         },
-        getImageScaled: function () {
+        getImageScaled () {
             const { width, height } = this.getDimensions();
 
             const canvas = document.createElement('canvas');
@@ -400,10 +443,10 @@ export default {
 
             return canvas;
         },
-        imageChanged: function () {
+        imageChanged () {
             return this.changed;
         },
-        getCroppingRect: function () {
+        getCroppingRect () {
             const dim = this.getDimensions();
             const frameRect = {
                 x: dim.border,
@@ -420,14 +463,14 @@ export default {
                 height: frameRect.height / imageRect.height
             };
         },
-        clicked: function (e) {
+        clicked (e) {
             if (this.dragged === true) {
                 this.dragged = false;
             } else {
-                document.getElementById('ab-1').click();
+                this.$refs.input.click();
             }
         },
-        fileSelected: function (e) {
+        fileSelected (e) {
             var files = e.target.files || e.dataTransfer.files;
 
             if (!files.length) {
@@ -444,18 +487,26 @@ export default {
     },
     watch: {
         state: {
-            handler: function (val, oldval) {
+            handler (val, oldval) {
                 if (this.imageLoaded) {
                     this.redraw();
                 }
             },
             deep: true
         },
-        scale: function () {
-            if (this.imageLoaded === true) {
+        scale () {
+            if (this.imageLoaded) {
+                this.replaceImageInBounds();
+                this.redraw();
+            }
+        },
+        rotation () {
+            if (this.imageLoaded) {
+                this.replaceImageInBounds();
                 this.redraw();
             }
         }
+
     }
 };
 </script>

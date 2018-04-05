@@ -1,9 +1,9 @@
 {
   "name": "vue-avatar-editor-improved",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Resize, rotate and crop your uploaded image using a clear user interface",
   "author": "Pluquet Frédéric <fpluquet@yahoo.fr>",
-  "url": "https://github.com/fpluquet/vue-avatar-editor",
+  "homepage": "https://github.com/fpluquet/vue-avatar-editor",
   "main": "src/index.js",
   "scripts": {
     "dev": "node build/dev-server.js",

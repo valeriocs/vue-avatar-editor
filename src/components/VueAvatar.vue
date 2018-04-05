@@ -45,24 +45,6 @@ canvas {
 </style>
 
 <script>
-const drawRoundedRect = (context, x, y, width, height, borderRadius) => {
-    if (borderRadius === 0) {
-        context.rect(x, y, width, height);
-    } else {
-        const widthMinusRad = width - borderRadius;
-        const heightMinusRad = height - borderRadius;
-        context.translate(x, y);
-        context.arc(borderRadius, borderRadius, borderRadius, Math.PI, Math.PI * 1.5);
-        context.lineTo(widthMinusRad, 0);
-        context.arc(widthMinusRad, borderRadius, borderRadius, Math.PI * 1.5, Math.PI * 2);
-        context.lineTo(width, heightMinusRad);
-        context.arc(widthMinusRad, heightMinusRad, borderRadius, Math.PI * 2, Math.PI * 0.5);
-        context.lineTo(borderRadius, height);
-        context.arc(borderRadius, heightMinusRad, borderRadius, Math.PI * 0.5, Math.PI);
-        context.translate(-x, -y);
-    }
-};
-
 export default {
     props: {
         image: {
@@ -149,6 +131,23 @@ export default {
         }
     },
     methods: {
+        drawRoundedRect (context, x, y, width, height, borderRadius) {
+            if (borderRadius === 0) {
+                context.rect(x, y, width, height);
+            } else {
+                const widthMinusRad = width - borderRadius;
+                const heightMinusRad = height - borderRadius;
+                context.translate(x, y);
+                context.arc(borderRadius, borderRadius, borderRadius, Math.PI, Math.PI * 1.5);
+                context.lineTo(widthMinusRad, 0);
+                context.arc(widthMinusRad, borderRadius, borderRadius, Math.PI * 1.5, Math.PI * 2);
+                context.lineTo(width, heightMinusRad);
+                context.arc(widthMinusRad, heightMinusRad, borderRadius, Math.PI * 2, Math.PI * 0.5);
+                context.lineTo(borderRadius, height);
+                context.arc(borderRadius, heightMinusRad, borderRadius, Math.PI * 0.5, Math.PI);
+                context.translate(-x, -y);
+            }
+        },
         svgToImage (rawSVG) {
             let svg = new Blob([rawSVG], {type: 'image/svg+xml;charset=utf-8'});
             let domURL = self.URL || self.webkitURL || self;
@@ -182,7 +181,7 @@ export default {
             this.context.beginPath();
 
             // inner rect, possibly rounded
-            drawRoundedRect(
+            this.drawRoundedRect(
                 this.context,
                 borderSize,
                 borderSize,

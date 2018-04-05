@@ -6,6 +6,21 @@ Resize, rotate and crop your uploaded image using a clear user interface.
 
 Demo at <a href="https://fpluquet.github.io/vue-avatar-editor/">https://fpluquet.github.io/vue-avatar-editor/</a>
 
+# Installation
+
+This is a [Node.js](https://nodejs.org/en/) module available through the
+[npm registry](https://www.npmjs.com/).
+
+Before installing, [download and install Node.js](https://nodejs.org/en/download/).
+Node.js 0.10 or higher is required.
+
+Installation is done using the
+[`npm install` command](https://docs.npmjs.com/getting-started/installing-npm-packages-locally):
+
+```bash
+$ npm install vue-avatar-editor-improved
+```
+
 # Usage
 
 ```html
@@ -20,25 +35,30 @@ Demo at <a href="https://fpluquet.github.io/vue-avatar-editor/">https://fpluquet
       >
     </vue-avatar>
     <br>
-    <vue-avatar-scale
-      ref="vueavatarscale"
-      :width=250
-      :min=1
-      :max=3
-      :step=0.02
-      :value.sync='scale'
-      >
-    </vue-avatar-scale>
+    <input
+      type="range"
+      min=1
+      max=3
+      step=0.02
+      :value='scale'
+    />
+    <input
+      type="range"
+      min=1
+      max=3
+      step=0.02
+      :value='rotation'
+    />
     <br>
-    <img src="" ref="image">
     <button v-on:click="saveClicked">Click</button>
+    <br>
+    <img ref="image">
 </div>
 ```
 
 ```javascript
 import Vue from 'vue'
-import VueAvatar from './components/VueAvatar.vue'
-import VueAvatarScale from './components/VueAvatarScale.vue'
+import {VueAvatar} from 'vue-avatar-editor-improved'
 
 let vm = new Vue({
   el: '#app',

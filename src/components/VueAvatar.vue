@@ -505,8 +505,10 @@ export default {
                 this.replaceImageInBounds();
                 this.redraw();
             }
+        },
+        borderRadius () {
+            this.redraw();
         }
-
     }
 };
 </script>

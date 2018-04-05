@@ -1,62 +1,101 @@
 <template>
   <div id="app">
-    <h1>hello</h1>
+    <h1>Vue-Avatar-Editor Example</h1>
+    <h2> With basic component : Vue-Avatar </h2>
     <vue-avatar
       :width=400
       :height=400
       :rotation="rotation"
+      :borderRadius="borderRadius"
       :scale="scale"
       ref="vueavatar"
       @vue-avatar-editor:image-ready="onImageReady"
       >
     </vue-avatar>
     <br>
-    <vue-avatar-scale
-      ref="vueavatarscale"
-      :width=250
-      :min=1
-      :max=3
-      :step=0.02
-      :value.sync='scale'
-      >
-    </vue-avatar-scale>
-    <vue-avatar-scale
-      ref="vueavatarrotate"
-      :width=250
-      :min=0
-      :max=360
-      :step=1
-      :value.sync='rotation'
-      >
-    </vue-avatar-scale>
+    <label>
+      Zoom : {{scale}}x
+      <br>
+      <input
+        type="range"
+        min=1
+        max=3
+        step=0.02
+        v-model='scale'
+      />
+    </label>
+    <br>
+    <label>
+      Rotation : {{rotation}}°
+      <br>
+      <input
+        type="range"
+        min=0
+        max=360
+        step=1
+        v-model='rotation'
+      />
+    </label>
+    <br>
+    <label>
+      Radius : {{borderRadius}}px
+      <br>
+      <input
+        type="range"
+        min=0
+        max=200
+        step=1
+        v-model='borderRadius'
+      />
+    </label>
+    <br>
+    <button v-on:click="saveClicked">Get image</button>
     <br>
     <img src="" ref="image">
-    <button v-on:click="saveClicked">Click</button>
+
+    <h2> With integrated component : Vue-Avatar-Editor </h2>
+    <vue-avatar-editor 
+      @finished="saveClickedFromEditor"
+      :width=400
+      :height=400
+      >
+    </vue-avatar-editor>
+    <img src="" ref="imageFromEditor">
   </div>
 </template>
 
 <script>
-    export default {
-        name: 'app',
-        data () {
-            return {
-                rotation: 0,
-                scale: 1
-            };
+import VueAvatar from './components/VueAvatar';
+import VueAvatarEditor from './components/VueAvatarEditor';
+
+export default {
+    name: 'app',
+    components: {
+        VueAvatar,
+        VueAvatarEditor
+    },
+    data () {
+        return {
+            rotation: 0,
+            scale: 1,
+            borderRadius: 0
+        };
+    },
+    methods: {
+        saveClicked () {
+            var img = this.$refs.vueavatar.getImageScaled();
+            this.$refs.image.src = img.toDataURL();
         },
-        methods: {
-            saveClicked () {
-                var img = this.$refs.vueavatar.getImageScaled();
-                this.$refs.image.src = img.toDataURL();
-            },
-            onImageReady () {
-                console.log('here');
-                this.scale = 1;
-                this.rotation = 0;
-            }
+        onImageReady () {
+            this.scale = 1;
+            this.rotation = 0;
+        },
+        saveClickedFromEditor (img) {
+            this.$refs.imageFromEditor.src = img.toDataURL();
         }
-    };
-  </script>
+    }
+};
+</script>
 
 <style>
 #app {

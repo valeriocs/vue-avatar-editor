@@ -2,94 +2,51 @@
   <div id="app">
     <h1>Vue-Avatar-Editor Example</h1>
     <h2> With basic component : Vue-Avatar </h2>
-    <vue-avatar
-      :width=400
-      :height=400
-      :rotation="rotation"
-      :borderRadius="borderRadius"
-      :scale="scale"
-      ref="vueavatar"
-      @vue-avatar-editor:image-ready="onImageReady"
-      >
-    </vue-avatar>
-    <br>
-    <label>
-      Zoom : {{scale}}x
-      <br>
-      <input
-        type="range"
-        min=1
-        max=3
-        step=0.02
-        v-model='scale'
-      />
-    </label>
-    <br>
-    <label>
-      Rotation : {{rotation}}°
-      <br>
-      <input
-        type="range"
-        min=0
-        max=360
-        step=1
-        v-model='rotation'
-      />
-    </label>
-    <br>
-    <label>
-      Radius : {{borderRadius}}px
-      <br>
-      <input
-        type="range"
-        min=0
-        max=200
-        step=1
-        v-model='borderRadius'
-      />
-    </label>
-    <br>
-    <button v-on:click="saveClicked">Get image</button>
-    <br>
-    <img src="" ref="image">
+    <basic-vue-avatar ref="basic"></basic-vue-avatar>
+    HTML code
+    <pre class="prettyprint">{{basic.html}}</pre>
+    JS code
+    <pre class="prettyprint">{{basic.js}}</pre>
+
 
     <h2> With integrated component : Vue-Avatar-Editor </h2>
-    <vue-avatar-editor 
-      @finished="saveClickedFromEditor"
-      :width=400
-      :height=400
-      >
-    </vue-avatar-editor>
-    <img src="" ref="imageFromEditor">
+    <vue-avatar-editor ref="editor"></vue-avatar-editor>
+    HTML code
+    <pre class="prettyprint">{{editor.html}}</pre>
+    JS code
+    <pre class="prettyprint">{{editor.js}}</pre>
   </div>
 </template>
 
 <script>
-import VueAvatar from './components/VueAvatar';
-import VueAvatarEditor from './components/VueAvatarEditor';
+import BasicVueAvatar from './examples/BasicVueAvatar.vue';
+import VueAvatarEditor from './examples/VueAvatarEditor.vue';
 
 export default {
     name: 'app',
     components: {
-        VueAvatar,
+        BasicVueAvatar,
         VueAvatarEditor
     },
     data () {
         return {
-            rotation: 0,
-            scale: 1,
-            borderRadius: 0
+            basic: {
+                html: '',
+                js: ''
+            },
+            editor: {
+                html: '',
+                js: ''
+            }
         };
     },
+    mounted () {
+        this.basic.html = this.$refs.basic.getRawHTML();
+        this.basic.js = this.$refs.basic.getRawJS();
+        this.editor.html = this.$refs.editor.getRawHTML();
+        this.editor.js = this.$refs.editor.getRawJS();
+    },
     methods: {
-        saveClicked () {
-            var img = this.$refs.vueavatar.getImageScaled();
-            this.$refs.image.src = img.toDataURL();
-        },
-        onImageReady () {
-            this.scale = 1;
-            this.rotation = 0;
-        },
         saveClickedFromEditor (img) {
             this.$refs.imageFromEditor.src = img.toDataURL();
         }
@@ -98,12 +55,17 @@ export default {
 </script>
 
 <style>
-#app {
+  #app {
       font-family: 'Avenir', Helvetica, Arial, sans-serif;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       text-align: center;
       color: #2c3e50;
       margin-top: 60px;
+  }
+  pre {
+    text-align: left;
+    margin: 0 auto;
+    max-width: 800px;
   }
   </style>

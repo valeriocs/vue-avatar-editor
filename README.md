@@ -58,7 +58,6 @@ let vm = new Vue({
           this.$refs.image.src = img.toDataURL()
       },
       onImageReady () {
-          console.log('here')
           this.scale = 1
           this.rotation = 0
       }

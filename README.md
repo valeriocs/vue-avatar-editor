@@ -2,6 +2,28 @@
 
 Essa versão do avatar-editor contem um emit do vue avatar para o editor com o event files, permitindo que você use o proprio arquivo ou o base64 para tratar algum upload ou afim.
 
+Basta utilizar listener "select-file", exemplo:
+```html
+    <vue-avatar
+      :width='width'
+      :height='height'
+      :rotation="rotation"
+      :borderRadius="borderRadius"
+      :border='border'
+      :color='color'
+      :scale="scale"
+      ref="vueavatar"
+      @vue-avatar-editor:image-ready="onImageReady"
+      @select-file="onSelectFile($event)" 
+      >
+    </vue-avatar>
+```
+```javascript
+      onSelectFile (files) {
+            console.log('here is your file', files[0]);
+      },
+```
+
 # vue-avatar-editor
 
 Facebook like, avatar / profile picture component. This is Vue.js clone of <a href="https://github.com/mosch/react-avatar-editor">mosch/react-avatar-editor</a>

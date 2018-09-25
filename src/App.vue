@@ -10,11 +10,17 @@
 
 
     <h2> With integrated component : Vue-Avatar-Editor </h2>
-    <vue-avatar-editor ref="editor"></vue-avatar-editor>
+    <vue-avatar-editor
+      ref="editor"
+      @select-file="onSelectFile($event, this.eventFile)"
+      >
+    </vue-avatar-editor>
     HTML code
     <pre class="prettyprint">{{editor.html}}</pre>
     JS code
     <pre class="prettyprint">{{editor.js}}</pre>
+    File attached
+    <pre class="prettyprint"> {{ eventFile }}</pre>
   </div>
 </template>
 
@@ -30,6 +36,7 @@ export default {
     },
     data () {
         return {
+            eventFile: {},
             basic: {
                 html: '',
                 js: ''

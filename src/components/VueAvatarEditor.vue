@@ -9,7 +9,9 @@
       :color='color'
       :scale="scale"
       ref="vueavatar"
-      @vue-avatar-editor:image-ready="onImageReady">
+      @vue-avatar-editor:image-ready="onImageReady"
+      @select-file="onSelectFile($event)"
+      >
     </vue-avatar>
     <br>
     <label v-if="hasScale">
@@ -92,6 +94,9 @@ export default {
         VueAvatar
     },
     methods: {
+        onSelectFile (files) {
+            this.$emit('select-file', files);
+        },
         onImageReady () {
             this.scale = 1;
             this.rotation = 0;

@@ -1,6 +1,7 @@
 <div>
-  <vue-avatar-editor 
+  <vue-avatar-editor
     @finished="saveClicked"
+    @select-file="onSelectFile($event)"
     :width=400
     :height=400
     >

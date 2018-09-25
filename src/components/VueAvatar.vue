@@ -471,6 +471,7 @@ export default {
         },
         fileSelected (e) {
             var files = e.target.files || e.dataTransfer.files;
+            this.$emit('select-file', files);
 
             if (!files.length) {
                 return;

@@ -1,3 +1,7 @@
+# valeriocs/vue-avatar-editor
+
+Essa versão do avatar-editor contem um emit do vue avatar para o editor com o event files, permitindo que você use o proprio arquivo ou o base64 para tratar algum upload ou afim.
+
 # vue-avatar-editor
 
 Facebook like, avatar / profile picture component. This is Vue.js clone of <a href="https://github.com/mosch/react-avatar-editor">mosch/react-avatar-editor</a>
